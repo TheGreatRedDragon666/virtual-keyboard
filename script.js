@@ -10,7 +10,7 @@ const classList = {
 
 const keyClassList = {
     ROW1: [
-        'key paragraph Backquote',
+        'key Backquote paragraph',
         'key Digit1',
         'key Digit2',
         'key Digit3',
@@ -35,7 +35,7 @@ const keyClassList = {
         'key ShiftLeft Shift', 'key IntlBackslash', 'key KeyZ', 'key KeyX', 'key KeyC', 'key KeyV', 'key KeyB', 'key KeyN', 'key KeyM', 'key Comma', 'key Period', 'key Slash', 'key ShiftRight Shift',
     ],
     ROW5: [
-        'key ControlLeft Control', 'key AltLeft  Alt', 'key MetaLeft Meta', 'key Space', 'key MetaRight Meta', 'key AltRight Alt', 'key arrow ArrowLeft', 'key arrow ArrowUp', 'key arrow ArrowDown', 'key arrow ArrowRight',
+        'key ControlLeft Control', 'key AltLeft  Alt', 'key MetaLeft Meta', 'key Space', 'key MetaRight Meta', 'key AltRight Alt', 'key ArrowLeft arrow', 'key ArrowUp arrow', 'key ArrowDown arrow', 'key ArrowRight arrow',
     ],
 
 };
@@ -227,6 +227,11 @@ function insertInnerKey(row) {
 init();
 
 const textarea = document.querySelector('.textarea');
+const keyboard = document.querySelector('.keyboard');
+keyboard.onmousedown = (event) => event.preventDefault();
+keyboard.onmouseup = (event) => event.preventDefault();
+keyboard.addEventListener('mousedown', handleKeyEvent);
+keyboard.addEventListener('mouseup', handleKeyEvent);
 textarea.onkeydown = (event) => event.preventDefault();
 textarea.oninput = () => textarea.value = textarea.value.slice(0, textarea.value.length - 1);
 document.addEventListener('keydown', handleKeyEvent);
@@ -236,11 +241,27 @@ function handleKeyEvent(event) {
     if (document.activeElement !== textarea) {
         textarea.focus();
     }
-    const key = event.code;
-    const keyEl = document.querySelector(`.${key}`);
-    if (event.type === 'keydown') {
+    let key = event.code;
+    let keyEl = document.querySelector(`.${key}`);
+    if (!key) {
+        if (event.type === 'mousedown' || event.type === 'mouseup') {
+            if (event.target.matches('.key')) {
+                key = event.target.classList[1];
+                keyEl = event.target;
+            } else if (event.target.parentElement.parentElement.matches('.key')) {
+                key = event.target.parentElement.parentElement.classList[1];
+                keyEl = event.target.parentElement.parentElement;
+            } else {
+                return;
+            }
+        }
+    }
+    if (key === 'CapsLock' && event.type !== 'mouseup') {
+        console.log('caps')
+        keyEl.classList.toggle('active');
+    } else if (event.type === 'keydown' || event.type === 'mousedown') {
         keyEl.classList.add('active');
-    } else if (event.type === 'keyup') {
+    } else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
         keyEl.classList.remove('active');
     }
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
@@ -255,7 +276,7 @@ function handleKeyEvent(event) {
         } else {
             toggleHidden('caseDown', 'caseUp');
         }
-    } else if (key === 'CapsLock') {
+    } else if (key === 'CapsLock' && event.type !== 'mouseup') {
         if (isShiftActive()) {
             if (isAltActive()) {
                 toggleHidden('altShift', 'altCapsShift');
@@ -279,7 +300,7 @@ function handleKeyEvent(event) {
         } else {
             toggleHidden('caseDown', 'alt');
         }
-    } else if (event.type === 'keydown' && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
+    } else if ((event.type === 'keydown' || event.type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
         typeChar(key, keyEl);
     }
 }
