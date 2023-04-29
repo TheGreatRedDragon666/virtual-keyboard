@@ -273,7 +273,6 @@ function handleKeyEvent(event) {
             }
             mouseDown = key;
             mouseDownBtn = keyEl;
-            console.log(key, keyEl);
         }
     }
     if (key === 'CapsLock' && event.type !== 'mouseup') {
@@ -346,26 +345,40 @@ function handleKeyEvent(event) {
 }
 
 function typeChar(key, keyEl) {
-    if (textarea.selectionStart === textarea.selectionEnd && textarea.selectionStart === textarea.value.length) {
+    let pos = textarea.selectionStart;
+    let end = textarea.selectionEnd;
+    const value = textarea.value;
+    const part1 = value.slice(0, pos);
+    const part2 = value.slice(pos);
+    if (pos === end ) {
         if (key === 'Tab') {
-            textarea.value += '\t';
+            textarea.value = part1 + '\t' + part2;
         }
         else if (key === 'Enter') {
-            textarea.value += '\n';
+            textarea.value = part1 + '\n' + part2;
         }
         else if (key === 'Backspace') {
-            textarea.value = textarea.value.slice(0, textarea.value.length - 1);
+            textarea.value = part1.slice(0, part1.length - 1) + part2;
+            pos = pos - 2;
+            //textarea.value = textarea.value.slice(0, textarea.value.length - 1);
         }
         else if (key === 'Space') {
-            textarea.value += ' ';
+            textarea.value = part1 + ' ' + part2;
         }
         else {
             const lang = getLang();
             const curChar = keyEl.querySelector(`.${lang} > span:not(.hidden)`);
-            textarea.value += curChar.innerText;
+            textarea.value = part1 + curChar.innerText + part2;
+        }
+        textarea.selectionStart = pos + 1;
+        textarea.selectionEnd = pos + 1;
+    } else {
+        if (key === 'Backspace') {
+           textarea.value = value.slice(0, pos) + value.slice(end);
+            textarea.selectionStart = pos;
+            textarea.selectionEnd = pos;
         }
     }
-
 }
 
 function toggleHidden(className1, className2 = null) {
