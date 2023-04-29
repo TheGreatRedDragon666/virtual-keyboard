@@ -236,7 +236,8 @@ textarea.onkeydown = (event) => event.preventDefault();
 textarea.oninput = () => textarea.value = textarea.value.slice(0, textarea.value.length - 1);
 document.addEventListener('keydown', handleKeyEvent);
 document.addEventListener('keyup', handleKeyEvent);
-
+let mouseDown = null;
+let mouseDownBtn = null;
 function handleKeyEvent(event) {
     if (document.activeElement !== textarea) {
         textarea.focus();
@@ -244,7 +245,13 @@ function handleKeyEvent(event) {
     let key = event.code;
     let keyEl = document.querySelector(`.${key}`);
     if (!key) {
-        if (event.type === 'mousedown' || event.type === 'mouseup') {
+        if (event.type  === 'mouseup' && mouseDown && mouseDownBtn) {
+            key = mouseDown;
+            keyEl = mouseDownBtn;
+            mouseDown = null;
+            mouseDownBtn = null;
+        }
+        if (event.type === 'mousedown') {
             if (event.target.matches('.key')) {
                 key = event.target.classList[1];
                 keyEl = event.target;
@@ -254,16 +261,20 @@ function handleKeyEvent(event) {
             } else {
                 return;
             }
+            mouseDown = key;
+            mouseDownBtn = keyEl;
         }
     }
     if (key === 'CapsLock' && event.type !== 'mouseup') {
-        console.log('caps')
         keyEl.classList.toggle('active');
+    } else if (((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) || ((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
+
     } else if (event.type === 'keydown' || event.type === 'mousedown') {
         keyEl.classList.add('active');
     } else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
         keyEl.classList.remove('active');
     }
+
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
         if (isAltActive()) {
             if (isCapsActive()) {
@@ -306,19 +317,22 @@ function handleKeyEvent(event) {
 }
 
 function typeChar(key, keyEl) {
-    if (key === 'Tab') {
-        textarea.value += '\t';
-    } else if (key === 'Enter') {
-        textarea.value += '\n';
-    } else if (key === 'Backspace') {
-        textarea.value = textarea.value.slice(0, textarea.value.length - 1);
-    } else if (key === 'Space') {
-        textarea.value += ' ';
-    } else {
-        const lang = getLang();
-        const curChar = keyEl.querySelector(`.${lang} > span:not(.hidden)`);
-        textarea.value += curChar.innerText;
+    if (textarea.selectionStart === textarea.selectionEnd && textarea.selectionStart === textarea.value.length) {
+        if (key === 'Tab') {
+            textarea.value += '\t';
+        } else if (key === 'Enter') {
+            textarea.value += '\n';
+        } else if (key === 'Backspace') {
+            textarea.value = textarea.value.slice(0, textarea.value.length - 1);
+        } else if (key === 'Space') {
+            textarea.value += ' ';
+        } else {
+            const lang = getLang();
+            const curChar = keyEl.querySelector(`.${lang} > span:not(.hidden)`);
+            textarea.value += curChar.innerText;
+        }
     }
+
 }
 
 function toggleHidden(className1, className2 = null) {
