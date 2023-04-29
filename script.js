@@ -64,7 +64,7 @@ const characters = {
 };
 
 const TITLE = 'RSS Virtual Keyboard';
-const TIP = 'Keyboard was created using MacOS <br> Shortcut to switch language: ctrl + space';
+const TIP = 'Keyboard was created using MacOS <br> Shortcut to switch language: ctrl(^) + cmd(⌘)';
 
 const rows = [];
 const keys = [];
@@ -153,54 +153,58 @@ function createElement(tag, className) {
 }
 
 function getTemplate(row, i, isEN = true) {
-    let className = 'en';
-    let caseDown;
-    let caseUp;
-    let caps;
+    const currentLang = sessionStorage.getItem('lang');
+    let className = isEN ? 'en' : 'ru';
+    const rowLang = `ROW${row}_${className.toUpperCase()}`;
+    if (currentLang && ((isEN && currentLang === 'ru') || (!isEN && currentLang === 'en'))) {
+        className += ' hidden';
+    }
+    if (!currentLang && !isEN) {
+        className += ' hidden';
+    }
     let capsShift;
-    let alt;
-    let altShift;
     let altCaps;
     let altCapsShift;
-    let rowLang;
+    let caps;
+    const caseDown = characters[rowLang][i];
+    const caseUp = characters[rowLang][i + 1];
+    const alt = characters[`${rowLang}_ALT`][i];
+    const altShift = characters[`${rowLang}_ALT`][i + 1];
+    const capsExceptionsEn = [[1], [2, 22], [2, 24], [3, 20], [3, 22], [3, 24], [4, 2], [4, 18], [4, 20], [4, 22]];
+    const capsExceptionsRu = [[1], [4, 2], [4, 22]];
+    const altCapsExceptionsEn = [[2, 2], [2, 12], [2, 18], [2, 20], [4, 8], [4, 12], [4, 16]];
+    const altCapsExceptionsRu = [[1], [2, 8], [2, 10], [2, 20], [2, 22], [3, 14]];
+    const predicate = (pair) => pair.length === 1 ? row === pair[0] : row === pair[0] && i === pair[1];
     if (isEN) {
-        rowLang = `ROW${row}_EN`;
-    }
-    if (!isEN) {
-        rowLang = `ROW${row}_RU`;
-        className = 'ru hidden';
-    }
-    caseDown = characters[rowLang][i];
-    caseUp = characters[rowLang][i + 1];
-    alt = characters[`${rowLang}_ALT`][i];
-    altShift = characters[`${rowLang}_ALT`][i + 1];
-    const capsExceptions = [[1], [2, 22], [2, 24], [3, 20], [3, 22], [3, 24], [4, 2], [4, 18], [4, 20], [4, 22]];
-    const altCapsExceptions = [[2, 2], [2, 12], [2, 18], [2, 20], [4, 8], [4, 12], [4, 16]];
-    const predicate = (pair) => {
-        if (pair.length === 1 && pair[0] === row) return true;
-        return row === pair[0] && i === pair[1];
-    }
-    if (capsExceptions.some(predicate)) {
-        caps = caseDown;
-    } else {
-        caps = caseUp;
-    }
-    if (row === 3) {
-        if (i === 10 || i === 16 || i === 20) {
-            altCaps = alt;
+        caps = capsExceptionsEn.some(predicate) ? caseDown : caseUp;
+        if (row === 3) {
+            if (i === 10 || i === 16 || i === 20 || i === 24) {
+                altCaps = alt;
+            }
+            else {
+                altCaps = altShift;
+            }
         }
         else {
-            altCaps = altShift;
+            altCaps = altCapsExceptionsEn.some(predicate) ? altShift : alt;
         }
-    } else if (altCapsExceptions.some(predicate)) {
-        altCaps = altShift;
-    } else {
-        altCaps = alt;
     }
-
+    else {
+        caps = capsExceptionsRu.some(predicate) ? caseDown : caseUp;
+        if (row === 4) {
+            if (i === 4 || i === 12) {
+                altCaps = altShift;
+            }
+            else {
+                altCaps = alt;
+            }
+        }
+        else {
+            altCaps = altCapsExceptionsRu.some(predicate) ? alt : altShift;
+        }
+    }
     altCapsShift = altShift;
     capsShift = caseUp;
-
     return `<span class="${className}">
               <span class="caseDown">${caseDown}</span>
               <span class="caseUp hidden">${caseUp}</span>
@@ -231,13 +235,14 @@ const keyboard = document.querySelector('.keyboard');
 keyboard.onmousedown = (event) => event.preventDefault();
 keyboard.onmouseup = (event) => event.preventDefault();
 keyboard.addEventListener('mousedown', handleKeyEvent);
-keyboard.addEventListener('mouseup', handleKeyEvent);
+document.addEventListener('mouseup', handleKeyEvent);
 textarea.onkeydown = (event) => event.preventDefault();
 textarea.oninput = () => textarea.value = textarea.value.slice(0, textarea.value.length - 1);
 document.addEventListener('keydown', handleKeyEvent);
 document.addEventListener('keyup', handleKeyEvent);
 let mouseDown = null;
 let mouseDownBtn = null;
+
 function handleKeyEvent(event) {
     if (document.activeElement !== textarea) {
         textarea.focus();
@@ -245,33 +250,42 @@ function handleKeyEvent(event) {
     let key = event.code;
     let keyEl = document.querySelector(`.${key}`);
     if (!key) {
-        if (event.type  === 'mouseup' && mouseDown && mouseDownBtn) {
+        if (event.type === 'mouseup' && mouseDown && mouseDownBtn) {
             key = mouseDown;
             keyEl = mouseDownBtn;
             mouseDown = null;
             mouseDownBtn = null;
         }
+        else if (!event.target.closest('.key')) {
+            return;
+        }
         if (event.type === 'mousedown') {
             if (event.target.matches('.key')) {
                 key = event.target.classList[1];
                 keyEl = event.target;
-            } else if (event.target.parentElement.parentElement.matches('.key')) {
+            }
+            else if (event.target.parentElement.parentElement.matches('.key')) {
                 key = event.target.parentElement.parentElement.classList[1];
                 keyEl = event.target.parentElement.parentElement;
-            } else {
+            }
+            else {
                 return;
             }
             mouseDown = key;
             mouseDownBtn = keyEl;
+            console.log(key, keyEl);
         }
     }
     if (key === 'CapsLock' && event.type !== 'mouseup') {
         keyEl.classList.toggle('active');
-    } else if (((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) || ((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
+    }
+    else if (((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) || ((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
 
-    } else if (event.type === 'keydown' || event.type === 'mousedown') {
+    }
+    else if (event.type === 'keydown' || event.type === 'mousedown') {
         keyEl.classList.add('active');
-    } else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
+    }
+    else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
         keyEl.classList.remove('active');
     }
 
@@ -279,39 +293,54 @@ function handleKeyEvent(event) {
         if (isAltActive()) {
             if (isCapsActive()) {
                 toggleHidden('altCaps', 'altCapsShift');
-            } else {
+            }
+            else {
                 toggleHidden('alt', 'altShift');
             }
-        } else if (isCapsActive()) {
+        }
+        else if (isCapsActive()) {
             toggleHidden('caps', 'capsShift');
-        } else {
+        }
+        else {
             toggleHidden('caseDown', 'caseUp');
         }
-    } else if (key === 'CapsLock' && event.type !== 'mouseup') {
+    }
+    else if (key === 'CapsLock' && event.type !== 'mouseup') {
         if (isShiftActive()) {
             if (isAltActive()) {
                 toggleHidden('altShift', 'altCapsShift');
-            } else {
+            }
+            else {
                 toggleHidden('caseUp', 'capsShift');
             }
-        } else if (isAltActive()) {
+        }
+        else if (isAltActive()) {
             toggleHidden('alt', 'altCaps');
-        } else {
+        }
+        else {
             toggleHidden('caseDown', 'caps');
         }
-    } else if (key === 'AltRight' || key === 'AltLeft') {
+    }
+    else if (key === 'AltRight' || key === 'AltLeft') {
         if (isShiftActive()) {
             if (isCapsActive()) {
                 toggleHidden('capsShift', 'altCapsShift');
-            } else {
+            }
+            else {
                 toggleHidden('caseUp', 'altShift');
             }
-        } else if (isCapsActive()) {
+        }
+        else if (isCapsActive()) {
             toggleHidden('caps', 'altCaps');
-        } else {
+        }
+        else {
             toggleHidden('caseDown', 'alt');
         }
-    } else if ((event.type === 'keydown' || event.type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
+    }
+    else if (isCtrlActive() && isMetaActive()) {
+        toggleLang();
+    }
+    else if ((event.type === 'keydown' || event.type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
         typeChar(key, keyEl);
     }
 }
@@ -320,13 +349,17 @@ function typeChar(key, keyEl) {
     if (textarea.selectionStart === textarea.selectionEnd && textarea.selectionStart === textarea.value.length) {
         if (key === 'Tab') {
             textarea.value += '\t';
-        } else if (key === 'Enter') {
+        }
+        else if (key === 'Enter') {
             textarea.value += '\n';
-        } else if (key === 'Backspace') {
+        }
+        else if (key === 'Backspace') {
             textarea.value = textarea.value.slice(0, textarea.value.length - 1);
-        } else if (key === 'Space') {
+        }
+        else if (key === 'Space') {
             textarea.value += ' ';
-        } else {
+        }
+        else {
             const lang = getLang();
             const curChar = keyEl.querySelector(`.${lang} > span:not(.hidden)`);
             textarea.value += curChar.innerText;
@@ -349,6 +382,21 @@ function toggleHidden(className1, className2 = null) {
     }
 }
 
+function toggleLang() {
+    const enKeys = Array.from(document.querySelectorAll('.en'));
+    const ruKeys = Array.from(document.querySelectorAll('.ru'));
+    if (getLang() === 'en') {
+        enKeys.forEach(key => key.classList.add('hidden'));
+        ruKeys.forEach(key => key.classList.remove('hidden'));
+        sessionStorage.setItem('lang', 'ru');
+    }
+    else if (getLang() === 'ru') {
+        ruKeys.forEach(key => key.classList.add('hidden'));
+        enKeys.forEach(key => key.classList.remove('hidden'));
+        sessionStorage.setItem('lang', 'en');
+    }
+}
+
 function getLang() {
     return !document.querySelector('.en').classList.contains('hidden') ? 'en' : 'ru';
 }
@@ -363,4 +411,12 @@ function isCapsActive() {
 
 function isAltActive() {
     return document.querySelector('.Alt.active') !== null;
+}
+
+function isCtrlActive() {
+    return document.querySelector('.Control.active') !== null;
+}
+
+function isMetaActive() {
+    return document.querySelector('.Meta.active') !== null;
 }
