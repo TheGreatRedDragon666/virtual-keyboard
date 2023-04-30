@@ -275,6 +275,7 @@ function handleKeyEvent(event) {
             mouseDownBtn = keyEl;
         }
     }
+    if (!keyEl) return;
     if (key === 'CapsLock' && event.type !== 'mouseup') {
         keyEl.classList.toggle('active');
     }
@@ -360,7 +361,6 @@ function typeChar(key, keyEl) {
         else if (key === 'Backspace') {
             textarea.value = part1.slice(0, part1.length - 1) + part2;
             pos = pos - 2;
-            //textarea.value = textarea.value.slice(0, textarea.value.length - 1);
         }
         else if (key === 'Space') {
             textarea.value = part1 + ' ' + part2;
@@ -373,11 +373,13 @@ function typeChar(key, keyEl) {
         textarea.selectionStart = pos + 1;
         textarea.selectionEnd = pos + 1;
     } else {
+        textarea.value = value.slice(0, pos) + value.slice(end);
+        textarea.selectionStart = pos;
+        textarea.selectionEnd = pos;
         if (key === 'Backspace') {
-           textarea.value = value.slice(0, pos) + value.slice(end);
-            textarea.selectionStart = pos;
-            textarea.selectionEnd = pos;
+            return;
         }
+        typeChar(key, keyEl);
     }
 }
 
