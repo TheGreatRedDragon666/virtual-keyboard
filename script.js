@@ -355,7 +355,7 @@ function handleKeyEvent(event) {
   if (!keyEl) return;
   if (key === 'CapsLock' && event.type !== 'mouseup') {
     keyEl.classList.toggle('active');
-  } else if (!((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) || !((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
+  } else if (!((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) && !((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
     if (event.type === 'keydown' || event.type === 'mousedown') {
       keyEl.classList.add('active');
     } else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
