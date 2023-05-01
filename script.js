@@ -78,12 +78,15 @@ function createElement(tag, className) {
 function getTemplate(row, i, isEN = true) {
   const currentLang = sessionStorage.getItem('lang');
   let className = isEN ? 'en' : 'ru';
+  let hidden = '';
   const rowLang = `ROW${row}_${className.toUpperCase()}`;
   if (currentLang && ((isEN && currentLang === 'ru') || (!isEN && currentLang === 'en'))) {
     className += ' hidden';
+    hidden = 'hidden';
   }
   if (!currentLang && !isEN) {
     className += ' hidden';
+    hidden = 'hidden';
   }
   let altCaps;
   let caps;
@@ -124,7 +127,7 @@ function getTemplate(row, i, isEN = true) {
     }
   }
   return `<span class="${className}">
-              <span class="caseDown">${caseDown}</span>
+              <span class="caseDown ${hidden}">${caseDown}</span>
               <span class="caseUp hidden">${caseUp}</span>
               <span class="caps hidden">${caps}</span>
               <span class="capsShift hidden">${caseUp}</span>
@@ -289,16 +292,22 @@ function toggleHidden(className1, className2 = null) {
   }
 }
 
-function toggleLang() {
+function toggleLang(className) {
   const enKeys = Array.from(document.querySelectorAll('.en'));
   const ruKeys = Array.from(document.querySelectorAll('.ru'));
+  const enShownKeys = Array.from(document.querySelectorAll(`.en .${className}`));
+  const ruShownKeys = Array.from(document.querySelectorAll(`.ru .${className}`));
   if (getLang() === 'en') {
     enKeys.forEach((key) => key.classList.add('hidden'));
     ruKeys.forEach((key) => key.classList.remove('hidden'));
+    enShownKeys.forEach((key) => key.classList.add('hidden'));
+    ruShownKeys.forEach((key) => key.classList.remove('hidden'));
     sessionStorage.setItem('lang', 'ru');
   } else if (getLang() === 'ru') {
     ruKeys.forEach((key) => key.classList.add('hidden'));
     enKeys.forEach((key) => key.classList.remove('hidden'));
+    ruShownKeys.forEach((key) => key.classList.add('hidden'));
+    enShownKeys.forEach((key) => key.classList.remove('hidden'));
     sessionStorage.setItem('lang', 'en');
   }
 }
@@ -405,10 +414,9 @@ function handleKeyEvent({
       toggleHidden('caseDown', 'alt');
     }
   } else if (isCtrlActive() && isMetaActive()) {
-    toggleLang();
-    if (isCapsActive() && document.querySelector(`.${getLang()} .caps.hidden`)) {
-      toggleHidden('caseDown', 'caps');
-    }
+    const prevLang = sessionStorage.getItem('lang');
+    const shownKeyClass = document.querySelector(`.${prevLang} span:not(.hidden)`).className;
+    toggleLang(shownKeyClass);
   } else if ((type === 'keydown' || type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
     typeChar(key, keyEl);
   }
