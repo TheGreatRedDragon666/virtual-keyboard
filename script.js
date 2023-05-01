@@ -254,7 +254,7 @@ function typeChar(key, keyEl) {
     } else if (key === 'Enter') {
       textarea.value = `${part1}\n${part2}`;
     } else if (key === 'Backspace') {
-      textarea.value = part1.slice(0, part1.length - 1) + part2;
+      textarea.value = part1.slice(0, Math.max(part1.length - 1, 0)) + part2;
       pos -= 2;
     } else if (key === 'Space') {
       textarea.value = `${part1} ${part2}`;
@@ -263,8 +263,8 @@ function typeChar(key, keyEl) {
       const curChar = keyEl.querySelector(`.${lang} > span:not(.hidden)`);
       textarea.value = part1 + curChar.innerText + part2;
     }
-    textarea.selectionStart = pos + 1;
-    textarea.selectionEnd = pos + 1;
+    textarea.selectionStart = Math.max(pos + 1, 0);
+    textarea.selectionEnd = textarea.selectionStart;
   } else {
     textarea.value = value.slice(0, pos) + value.slice(end);
     textarea.selectionStart = pos;
