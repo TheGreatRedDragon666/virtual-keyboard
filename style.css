@@ -1,0 +1,219 @@
+html {
+  height: 100%;
+  font-size: 8px;
+  background: linear-gradient(180deg, rgb(255, 221, 209) 0%, rgba(255, 233, 233, 0.8) 35%, rgba(143, 250, 224, 0.8) 100%);
+}
+
+body {
+  color: #D99077;
+  font-family: "Roboto", sans-serif;
+}
+
+.hidden {
+  display: none;
+}
+
+.Backspace,
+.ShiftRight, .Enter {
+  text-align: end;
+}
+
+.Tab,
+.CapsLock,
+.ShiftLeft {
+  text-align: start;
+}
+
+.h1 {
+  text-align: center;
+  font-size: 4rem;
+}
+
+.text {
+  text-align: center;
+  font-size: 3rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.textarea {
+  width: 74%;
+  background-color: rgba(255, 243, 243, 0.91);
+  outline-color: #D99077;
+  color: #D99077;
+}
+
+.keyboard {
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  gap: 5px;
+  width: 74%;
+}
+
+.row {
+  display: grid;
+  column-gap: 5px;
+}
+
+.row0 {
+  grid-template-columns: repeat(13, 1fr) 2fr;
+}
+
+.row1 {
+  grid-template-columns: 1.66fr repeat(12, 1fr) 1.33fr;
+}
+
+.row2 {
+  grid-template-columns: 2fr repeat(12, 1fr) 0.66fr;
+}
+
+.row3 {
+  grid-template-columns: 1.66fr repeat(11, 1fr) 2.33fr;
+}
+
+.row4 {
+  row-gap: 2px;
+  grid-template-rows: 0.5fr 0.5fr;
+  grid-template-columns: repeat(2, 1fr) 1.33fr 6.66fr 1.33fr repeat(4, 1fr);
+}
+
+.Control {
+  grid-area: 1/1/3/2;
+}
+
+.AltLeft {
+  grid-area: 1/2/3/3;
+}
+
+.MetaLeft {
+  grid-area: 1/3/3/4;
+}
+
+.Space {
+  grid-area: 1/4/3/5;
+}
+
+.MetaRight {
+  grid-area: 1/5/3/6;
+}
+
+.AltRight {
+  grid-area: 1/6/3/7;
+}
+
+.ArrowLeft {
+  grid-area: 1/7/3/8;
+}
+
+.ArrowUp {
+  grid-area: 1/8/2/9;
+}
+
+.ArrowDown {
+  grid-area: 2/8/3/9;
+}
+
+.ArrowRight {
+  grid-area: 1/9/3/10;
+}
+
+.active {
+  background-color: #FFDDD1 !important;
+  animation-name: highlight;
+  animation-duration: 0.4s;
+  animation-iteration-count: infinite;
+}
+
+.key {
+  background: #F2BFAE;
+  border: none;
+  box-shadow: 1px 1px 2px #969596;
+  padding: 2px 14px;
+}
+.key span {
+  color: rgba(255, 243, 243, 0.91);
+}
+.key:hover span {
+  color: #D99077;
+}
+.key:active {
+  background-color: #FFDDD1;
+  animation-name: highlight;
+  animation-duration: 0.4s;
+  animation-iteration-count: infinite;
+}
+
+.arrow {
+  font-size: 1rem;
+}
+
+.Control {
+  font-size: 2rem;
+}
+
+.active:after {
+  background-color: #FFDDD1 !important;
+  animation-name: highlight2;
+  animation-duration: 0.4s;
+  animation-iteration-count: infinite;
+}
+
+.Enter:active:after {
+  background-color: #FFDDD1;
+  animation-name: highlight2;
+  animation-duration: 0.4s;
+  animation-iteration-count: infinite;
+}
+
+.Enter:active span {
+  color: #D99077;
+}
+
+.Enter:after {
+  display: block;
+  content: " ";
+  background: #F2BFAE;
+  padding-top: 33px;
+  margin-bottom: -45px;
+  margin-right: -14px;
+  margin-left: 7px;
+  box-shadow: 1px 1px 2px #969596;
+  position: relative;
+  z-index: 998;
+}
+
+@keyframes highlight {
+  0% {
+    box-shadow: -1px -1px 1px 1px #79ffdd, -1px 1px 1px 1px rgb(112, 196, 248), 1px -1px 1px 1px #ffb4d3, 1px 1px 1px 1px #ffb7a0;
+  }
+  25% {
+    box-shadow: -1px -1px 1px 1px #ffb7a0, -1px 1px 1px 1px #79ffdd, 1px -1px 1px 1px rgb(112, 196, 248), 1px 1px 1px 1px #ffb4d3;
+  }
+  50% {
+    box-shadow: -1px -1px 1px 1px #ffb4d3, -1px 1px 1px 1px #ffb7a0, 1px -1px 1px 1px #79ffdd, 1px 1px 1px 1px rgb(112, 196, 248);
+  }
+  100% {
+    box-shadow: -1px -1px 1px 1px rgb(112, 196, 248), -1px 1px 1px 1px #ffb4d3, 1px -1px 1px 1px #ffb7a0, 1px 1px 1px 1px #79ffdd;
+  }
+}
+@keyframes highlight2 {
+  0% {
+    box-shadow: -1px 1px 1px 1px #79ffdd, -1px 1px 1px 1px rgb(112, 196, 248), 1px 1px 1px 1px #ffb4d3, 1px 1px 1px 1px #ffb7a0;
+  }
+  25% {
+    box-shadow: -1px 1px 1px 1px #ffb7a0, -1px 1px 1px 1px #79ffdd, 1px 1px 1px 1px rgb(112, 196, 248), 1px 1px 1px 1px #ffb4d3;
+  }
+  50% {
+    box-shadow: -1px 1px 1px 1px #ffb4d3, -1px 1px 1px 1px #ffb7a0, 1px 1px 1px 1px #79ffdd, 1px 1px 1px 1px rgb(112, 196, 248);
+  }
+  100% {
+    box-shadow: -1px 1px 1px 1px rgb(112, 196, 248), -1px 1px 1px 1px #ffb4d3, 1px 1px 1px 1px #ffb7a0, 1px 1px 1px 1px #79ffdd;
+  }
+}
