@@ -323,7 +323,9 @@ function isMetaActive() {
   return document.querySelector('.Meta.active') !== null;
 }
 
-function handleKeyEvent({code, target, type, repeat, shiftKey, altKey}) {
+function handleKeyEvent({
+  code, target, type, repeat, shiftKey, altKey,
+}) {
   if (document.activeElement !== textarea) {
     textarea.focus();
   }
@@ -404,6 +406,9 @@ function handleKeyEvent({code, target, type, repeat, shiftKey, altKey}) {
     }
   } else if (isCtrlActive() && isMetaActive()) {
     toggleLang();
+    if (isCapsActive() && document.querySelector(`.${getLang()} .caps.hidden`)) {
+      toggleHidden('caseDown', 'caps');
+    }
   } else if ((type === 'keydown' || type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
     typeChar(key, keyEl);
   }
