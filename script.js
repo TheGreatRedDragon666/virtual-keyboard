@@ -323,28 +323,28 @@ function isMetaActive() {
   return document.querySelector('.Meta.active') !== null;
 }
 
-function handleKeyEvent(event) {
+function handleKeyEvent({code, target, type, repeat, shiftKey, altKey}) {
   if (document.activeElement !== textarea) {
     textarea.focus();
   }
-  let key = event.code;
+  let key = code;
   let keyEl = document.querySelector(`.${key}`);
   if (!key) {
-    if (event.type === 'mouseup' && mouseDown && mouseDownBtn) {
+    if (type === 'mouseup' && mouseDown && mouseDownBtn) {
       key = mouseDown;
       keyEl = mouseDownBtn;
       mouseDown = null;
       mouseDownBtn = null;
-    } else if (!event.target.closest('.key')) {
+    } else if (!target.closest('.key')) {
       return;
     }
-    if (event.type === 'mousedown') {
-      if (event.target.matches('.key')) {
-        [, key] = event.target.classList;
-        keyEl = event.target;
-      } else if (event.target.parentElement.parentElement.matches('.key')) {
-        [, key] = event.target.parentElement.parentElement.classList;
-        keyEl = event.target.parentElement.parentElement;
+    if (type === 'mousedown') {
+      if (target.matches('.key')) {
+        [, key] = target.classList;
+        keyEl = target;
+      } else if (target.parentElement.parentElement.matches('.key')) {
+        [, key] = target.parentElement.parentElement.classList;
+        keyEl = target.parentElement.parentElement;
       } else {
         return;
       }
@@ -353,12 +353,15 @@ function handleKeyEvent(event) {
     }
   }
   if (!keyEl) return;
-  if (key === 'CapsLock' && event.type !== 'mouseup') {
+  if ((key === 'CapsLock' || key === 'ShiftRight' || key === 'ShiftLeft' || key === 'AltRight' || key === 'AltLeft') && repeat) {
+    return;
+  }
+  if (key === 'CapsLock' && type !== 'mouseup') {
     keyEl.classList.toggle('active');
-  } else if (!((key === 'ShiftLeft' || key === 'ShiftRight') && event.type === 'mouseup' && event.shiftKey) && !((key === 'AltLeft' || key === 'AltRight') && event.type === 'mouseup' && event.altKey)) {
-    if (event.type === 'keydown' || event.type === 'mousedown') {
+  } else if (!((key === 'ShiftLeft' || key === 'ShiftRight') && type === 'mouseup' && shiftKey) && !((key === 'AltLeft' || key === 'AltRight') && type === 'mouseup' && altKey)) {
+    if (type === 'keydown' || type === 'mousedown') {
       keyEl.classList.add('active');
-    } else if (event.type === 'keyup' || (event.type === 'mouseup' && key !== 'CapsLock')) {
+    } else if (type === 'keyup' || (type === 'mouseup' && key !== 'CapsLock')) {
       keyEl.classList.remove('active');
     }
   }
@@ -375,7 +378,7 @@ function handleKeyEvent(event) {
     } else {
       toggleHidden('caseDown', 'caseUp');
     }
-  } else if (key === 'CapsLock' && event.type !== 'mouseup') {
+  } else if (key === 'CapsLock' && type !== 'mouseup') {
     if (isShiftActive()) {
       if (isAltActive()) {
         toggleHidden('altShift', 'altCapsShift');
@@ -401,7 +404,7 @@ function handleKeyEvent(event) {
     }
   } else if (isCtrlActive() && isMetaActive()) {
     toggleLang();
-  } else if ((event.type === 'keydown' || event.type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
+  } else if ((type === 'keydown' || type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
     typeChar(key, keyEl);
   }
 }
