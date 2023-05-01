@@ -414,7 +414,7 @@ function handleKeyEvent({
       toggleHidden('caseDown', 'alt');
     }
   } else if (isCtrlActive() && isMetaActive()) {
-    const prevLang = sessionStorage.getItem('lang');
+    const prevLang = getLang();
     const shownKeyClass = document.querySelector(`.${prevLang} span:not(.hidden)`).className;
     toggleLang(shownKeyClass);
   } else if ((type === 'keydown' || type === 'mousedown') && key !== 'ControlLeft' && key !== 'MetaLeft' && key !== 'MetaRight') {
